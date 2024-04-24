@@ -1,7 +1,3 @@
-echo "# cv_codebase" >> README.md
-git init
-git add README.md
-git commit -m "first commit"
-git branch -M main
-git remote add origin https://github.com/nisarg-doshi/cv_codebase.git
-git push -u origin main
+This is a codebase containing all the computer vision modules that are frequently used.
+
+More info coming soon.
