@@ -1,13 +1,13 @@
 import cv2
 import numpy as np
 import os
-import uuid 
+import uuid
 from send_image_to_rlef import SendImageToRLEF  # Assuming SendImageToRLEF class exists
 
-class TwoCameraImageCapture:
+class MultiCameraImageCapture:
     """
     A class to capture images from multiple cameras simultaneously.
-    
+
     Attributes:
     camera_indexes (list): List of camera indexes for each camera device.
     image_width (int): The width of the captured image (default is 640).
@@ -18,8 +18,8 @@ class TwoCameraImageCapture:
 
     def __init__(self, camera_indexes, image_width=640, image_height=480, destination_folder="", rlef_model_id=""):
         """
-        Initializes the TwoCameraImageCapture object with the given camera indexes, width, height, destination folder, and RLEF model ID.
-        
+        Initializes the MultiCameraImageCapture object with the given camera indexes, width, height, destination folder, and RLEF model ID.
+
         Parameters:
         camera_indexes (list): List of camera indexes for each camera device.
         image_width (int): The width of the captured image (default is 640).
@@ -48,7 +48,7 @@ class TwoCameraImageCapture:
         """
         if len(tags) != len(self.camera_indexes):
             raise ValueError("Number of tags must match the number of cameras.")
-        
+
         caps = [cv2.VideoCapture(index) for index in self.camera_indexes]
         for cap in caps:
             cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter.fourcc('M', 'J', 'P', 'G'))
@@ -57,14 +57,14 @@ class TwoCameraImageCapture:
 
         if self.rlef_model_id:
             client = SendImageToRLEF(self.rlef_model_id)
-        
+
         counter = 0
         while True:
             frames = [cap.read()[1] for cap in caps]
             concatenated_frame = np.hstack(frames)
             cv2.imshow('Press "c" to capture, press "q" to quit', cv2.resize(concatenated_frame, (self.image_width * len(self.camera_indexes), self.image_height)))
             key = cv2.waitKey(1)
-            
+
             if key == ord('c'):
                 for i, frame in enumerate(frames):
                     random_name = str(uuid.uuid4())
@@ -74,10 +74,10 @@ class TwoCameraImageCapture:
                     if self.rlef_model_id:
                         client.send_image(model_name, label, image_path, tags[i], initial_confidence_score, prediction, metadata, delete_image_after_use)
                 counter += 1
-                
+
             elif key == ord('q'):
                 break
-                
+
         for cap in caps:
             cap.release()
         cv2.destroyAllWindows()
@@ -94,18 +94,18 @@ class TwoCameraImageCapture:
 
         if self.destination_folder:
             os.makedirs(self.destination_folder, exist_ok=True)
-        
+
         camera_folders = [os.path.join(self.destination_folder, f"camera_{i}") for i in range(len(self.camera_indexes))]
         for folder in camera_folders:
             os.makedirs(folder, exist_ok=True)
-        
+
         counter = 0
         while True:
             frames = [cap.read()[1] for cap in caps]
             concatenated_frame = np.hstack(frames)
             cv2.imshow('Press "c" to capture, press "q" to quit', cv2.resize(concatenated_frame, (self.image_width * len(self.camera_indexes), self.image_height)))
             key = cv2.waitKey(1)
-            
+
             if key == ord('c'):
                 for i, frame in enumerate(frames):
                     random_name = str(uuid.uuid4())
@@ -113,26 +113,26 @@ class TwoCameraImageCapture:
                     cv2.imwrite(image_path, frame)
                     print(f"Frame captured locally: {image_path}")
                 counter += 1
-                
+
             elif key == ord('q'):
                 break
-                
+
         for cap in caps:
             cap.release()
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     rlef_model_id = "65b0f505ee58cd58dabc1b83"
-    # rlef_model_id = ""
-    two_camera_capture = TwoCameraImageCapture(camera_indexes=[2, 5], image_width=1280, image_height=960, destination_folder="", rlef_model_id=rlef_model_id)
-    
+    rlef_model_id = ""
+    multi_camera_capture = MultiCameraImageCapture(camera_indexes=[2, 5, 4], image_width=640, image_height=480, destination_folder="", rlef_model_id=rlef_model_id)
+
     # Example usage for capturing frames and sending to RLEF
     if rlef_model_id:
         model_name = "Item In Hand Classification"
         label = 'initial'
-        tags = ['top_left_shelf', 'top_right_shelf']
-        two_camera_capture.capture_frames_and_send_to_rlef(model_name, label, tags)
-    
+        tags = ['top_left_shelf', 'top_right_shelf', 'bottom_shelf']
+        multi_camera_capture.capture_frames_and_send_to_rlef(model_name, label, tags)
+
     # Example usage for capturing frames locally
     else:
-        two_camera_capture.capture_frames_locally()
+        multi_camera_capture.capture_frames_locally()

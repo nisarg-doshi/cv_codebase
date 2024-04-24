@@ -71,7 +71,6 @@ class SendImageToRLEF:
                 os.remove(file_path)
                 print("Removed the image from local:", file_path)
 
-# Example Usage
 if __name__ == "__main__":
     model_name = "Item In Hand Classification"
     model_id = "65b0f505ee58cd58dabc1b83"
