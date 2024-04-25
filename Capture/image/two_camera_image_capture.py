@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import os
 import uuid 
-from Capture.rlef_utils.send_image_to_rlef import SendImageToRLEF  # Assuming SendImageToRLEF class exists
+from Capture.capture_utils.send_image_to_rlef import SendImageToRLEF  # Assuming SendImageToRLEF class exists
 
 class TwoCameraImageCapture:
     """

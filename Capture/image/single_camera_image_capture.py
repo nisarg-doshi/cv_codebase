@@ -1,7 +1,7 @@
 import cv2
 import os
 import random
-from Capture.rlef_utils.send_image_to_rlef import SendImageToRLEF
+from Capture.capture_utils.send_image_to_rlef import SendImageToRLEF
 
 class SingleImageCapture:
     """
