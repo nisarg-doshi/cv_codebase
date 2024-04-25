@@ -1,0 +1,7 @@
+This directory contains all the functions to capture image in desired resolution and to save it locally or send it to RLEF or both.
+single_camera_image_capture: For single camera setup for collection of data.
+two_camera_image_capture: For two cameras setup for collection of data from two camera streams parallely at same time
+multiple_camera_image_capture: For more than two camera setup for collection of data from all camera streams at once paralelly.
+send_image_to_rlef: Helper file to send images captured to RLEF to desginated model.
+
+
