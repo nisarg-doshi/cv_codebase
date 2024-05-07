@@ -99,7 +99,7 @@ def train_yolo8_model(yaml_path, epochs, batch, device, json_file):
     json_to_txt_convert(dataset_dir="datasets", json_file=json_file)
 
     # Initialize YOLOv8 model
-    model = YOLO('yolov8n.pt')  # Load a pretrained model (recommended for training)
+    model = YOLO('yolov8n-seg.pt')  # Load a pretrained model (recommended for training)
 
     # Train the model
     model.train(
