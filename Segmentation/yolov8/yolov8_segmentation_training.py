@@ -1,4 +1,3 @@
-
 # Import necessary libraries
 import os
 import cv2
@@ -6,8 +5,7 @@ import json
 import yaml
 from ultralytics import YOLO
 
-
-
+# Function to convert JSON annotations to YOLO format text files and create a YAML file for YOLO training
 def json_to_txt_convert(json_file, dataset_dir, training_id=123):
     """
     Converts JSON annotations to YOLO format text files and creates a YAML file for YOLO training.
@@ -43,27 +41,20 @@ def json_to_txt_convert(json_file, dataset_dir, training_id=123):
             height, width, depth = img.shape
         except:
             continue
-        
-        xmin = 999
-        ymin = 999
-        xmax = -1
-        ymax = -1
 
+        # Convert annotations to YOLO format
+        bbox = [ann["category_id"]]
         for i in range(len(poly) // 2):
-            xmin = min(xmin, poly[2 * i])
-            xmax = max(xmax, poly[2 * i])
-            ymin = min(ymin, poly[2 * i + 1])
-            ymax = max(ymax, poly[2 * i + 1])
+            _ = poly[2 * i] / width
+            bbox.append(_)
+            _ = poly[2 * i + 1] / height
+            bbox.append(_)
 
-        bbox = [ann["category_id"], (xmax + xmin) / (2 * width), (ymax + ymin) / (2 * height), (xmax - xmin) / width,
-                (ymax - ymin) / height]
-
-        
-
+        # Create label directory if it doesn't exist
         label_dir = os.path.join(dataset_dir, "labels")
-
         os.makedirs(label_dir, exist_ok=True)
 
+        # Write annotations to text files
         if os.path.exists(os.path.join(
                 label_dir, os.path.splitext(os.path.basename(image_id[ann["image_id"]]))[0] + ".txt")):
             file = open(os.path.join(
@@ -76,23 +67,21 @@ def json_to_txt_convert(json_file, dataset_dir, training_id=123):
             file.write(" ".join(map(str, bbox)))
         file.close()
 
+    # Extract classes from JSON and create YAML file for YOLO training
     classes = {i["id"]: i["name"] for i in jsfile["categories"]}
-
     yaml_file = {
         "train": f"{str(os.getcwd())}/datasets/{training_id}/images",
         "val": f"{str(os.getcwd())}/datasets/test_{training_id}/images"
     }
-    
-
     yaml_file["nc"] = len(classes)
     yaml_file["names"] = classes
 
+    # Write YAML file
     yaml_file_path = os.path.join("datasets", f"{training_id}.yaml")
     file = open(yaml_file_path, "w")
     yaml.dump(yaml_file, file)
 
-
-def train_yolo5_model(yaml_path, epochs, batch, device, json_file):
+def train_yolo8_model(yaml_path, epochs, batch, device, json_file):
     """
     Trains a YOLOv8 model using the specified YAML file, number of epochs, batch size, and device.
 
@@ -110,7 +99,7 @@ def train_yolo5_model(yaml_path, epochs, batch, device, json_file):
     json_to_txt_convert(dataset_dir="datasets", json_file=json_file)
 
     # Initialize YOLOv8 model
-    model = YOLO('yolov5n.pt')  # Load a pretrained model (recommended for training)
+    model = YOLO('yolov8n.pt')  # Load a pretrained model (recommended for training)
 
     # Train the model
     model.train(
@@ -119,28 +108,6 @@ def train_yolo5_model(yaml_path, epochs, batch, device, json_file):
         batch=batch,
         device=device
     )
-
-def test_yolov5_model(model_path, image_path):
-    """
-    Tests a YOLOv5 model on a single image and displays the results.
-
-    Args:
-    - model_path (str): Path to the YOLOv8 model file.
-    - image_path (str): Path to the image to be tested.
-
-    Returns:
-    None
-    """
-    # Initialize YOLOv8 model
-    model = YOLO(model_path)
-
-    # Perform inference on the image
-    results = model(image_path)
-
-    # Extract and display the results
-    for result in results:
-        result.show()
-        result.save(filename='result.jpg')
 
 if __name__ == "__main__":
     # Training parameters
@@ -153,9 +120,3 @@ if __name__ == "__main__":
     # Train YOLOv8 model
     train_yolo8_model(yaml_path, epochs, batch, device, json_file)
 
-    # Testing parameters
-    model_path = "best.pt"
-    image_path = "image.png"
-
-    # Test YOLOv8 model
-    test_yolov8_model(model_path, image_path)

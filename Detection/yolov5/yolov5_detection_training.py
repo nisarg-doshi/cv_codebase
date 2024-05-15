@@ -92,7 +92,7 @@ def json_to_txt_convert(json_file, dataset_dir, training_id=123):
     yaml.dump(yaml_file, file)
 
 
-def train_yolo8_model(yaml_path, epochs, batch, device, json_file):
+def train_yolo5_model(yaml_path, epochs, batch, device, json_file):
     """
     Trains a YOLOv8 model using the specified YAML file, number of epochs, batch size, and device.
 
@@ -110,7 +110,7 @@ def train_yolo8_model(yaml_path, epochs, batch, device, json_file):
     json_to_txt_convert(dataset_dir="datasets", json_file=json_file)
 
     # Initialize YOLOv8 model
-    model = YOLO('yolov8n.pt')  # Load a pretrained model (recommended for training)
+    model = YOLO('yolov5n.pt')  # Load a pretrained model (recommended for training)
 
     # Train the model
     model.train(
@@ -120,9 +120,9 @@ def train_yolo8_model(yaml_path, epochs, batch, device, json_file):
         device=device
     )
 
-def test_yolov8_model(model_path, image_path):
+def test_yolov5_model(model_path, image_path):
     """
-    Tests a YOLOv8 model on a single image and displays the results.
+    Tests a YOLOv5 model on a single image and displays the results.
 
     Args:
     - model_path (str): Path to the YOLOv8 model file.
@@ -151,11 +151,5 @@ if __name__ == "__main__":
     json_file = "coco.json"
 
     # Train YOLOv8 model
-    train_yolo8_model(yaml_path, epochs, batch, device, json_file)
+    train_yolo5_model(yaml_path, epochs, batch, device, json_file)
 
-    # Testing parameters
-    model_path = "best.pt"
-    image_path = "image.png"
-
-    # Test YOLOv8 model
-    test_yolov8_model(model_path, image_path)
