@@ -4,7 +4,7 @@ import pandas as pd
 import math
 from PIL import Image
 from math import atan2, cos, sin, sqrt, pi
-
+import argparse
 
 
 class ImageOrientationCorrection:
@@ -154,4 +154,24 @@ class ImageOrientationCorrection:
       rotated_image = image.rotate(angle, expand = False, fillcolor = self.fill)
       rotated_image.save(self.output_image_path) #saves the image in the output path
       # return rotated_image
+
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Image Orientation Correction")
+    parser.add_argument("--input_image", type=str, required=True, help="Path to the input image")
+    parser.add_argument("--output_image", type=str, required=True, help="Path to save the rotated image")
+    parser.add_argument("--fill_color", type=str, default="white", help="Fill color for the background after rotation (default: white)")
+    args = parser.parse_args()
+
+    correction = ImageOrientationCorrection()
+
+    # Measure the angle
+    angle = correction.measure_angle(args.input_image)
+
+    # Correct rotation
+    correction.correct_rotation(args.input_image, args.output_image, args.fill_color)
+
+    print(f"Image rotated by {angle} degrees and saved to {args.output_image}")
 
