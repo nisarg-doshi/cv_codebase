@@ -40,7 +40,7 @@ class YOLOv8Inference:
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="Test YOLOv5 model on a single image")
+    parser = argparse.ArgumentParser(description="Test YOLOv8 model on a single image")
     parser.add_argument("--model_path", type=str, required=True, default="yolov8n.pt", help="Path to the YOLOv5 model file")
     parser.add_argument("--image_path", type=str, required=True, help="Path to the image to be tested")
     args = parser.parse_args()
