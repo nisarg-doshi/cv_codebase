@@ -2,7 +2,7 @@ import requests
 import threading
 import os
 import shutil
-
+import argparse
 class SendVideoToRLEF:
     def __init__(self, model_id):
         """
@@ -108,12 +108,20 @@ class SendVideoToRLEF:
             # os.remove(file_path)
             # print("Removed the converted video:", file_path)
 
+
+
 if __name__ == "__main__":
-    model_name = "Grab Return Action Test"
-    model_id = "661fc080fb5587893103991c"
-    label = 'initial'
-    file_path = "/home/onm/Downloads/multiple_motion_tracking/videos/right_20240419_181317.mp4"
-    tag = 'top_shelf'
-    client = SendVideoToRLEF(model_id)
-    client.send_video(model_name, label, file_path, tag)
+    parser = argparse.ArgumentParser(description="Send a video to RLEF for processing")
+    parser.add_argument("--model_name", type=str, help="Name of the model")
+    parser.add_argument("--model_id", type=str, help="ID of the model")
+    parser.add_argument("--label", type=str, default="initial", help="Label for the video (default: 'initial')")
+    parser.add_argument("--file_path", type=str, help="Path to the video file")
+    parser.add_argument("--tag", type=str, default="top_shelf", help="Tag for the video (default: 'top_shelf')")
+    args = parser.parse_args()
+
+
+
+    client = SendVideoToRLEF(args.model_id)
+    client.send_video(args.model_name, args.label, args.file_path, args.tag)
     del client  # To cleanup dir created
+
