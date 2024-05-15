@@ -1,7 +1,7 @@
 import argparse
 from ultralytics import YOLO
 
-class YOLOv5Inference:
+class YOLOv8Inference:
     """
     A class to test YOLOv8 models on single images.
 
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Create YOLOv5Tester object
-    infer = YOLOv5Inference(args.model_path)
+    infer = YOLOv8Inference(args.model_path)
 
     # Test image using YOLOv5Tester
     infer.infer_image(args.image_path)
