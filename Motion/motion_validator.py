@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import argparse
 
 class MotionValidator:
     def __init__(self, compartment_points, motion_threshold=0.75):
@@ -41,13 +42,26 @@ class MotionValidator:
 
         return "valid" if avg_flow_magnitude > self.motion_threshold else "invalid"
 
+
+
+
+
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Motion Validator Script")
+    parser.add_argument("image1", type=str, help="Path to the first image file")
+    parser.add_argument("image2", type=str, help="Path to the second image file")
+    parser.add_argument("--compartment_points", nargs='+', type=int, default=[[190, 3], [148, 393], [544, 401], [561, 4]],
+                        help="Coordinates for 640x480 image from the same camera, converted to a list of lists")
+    args = parser.parse_args()
+
+
     # Coords for 640x480 image from the same camera, converted to a list of lists
-    compartment_points = [[190, 3], [148, 393], [544, 401], [561, 4]]
+    compartment_points = args.compartment_points
     mv = MotionValidator(compartment_points)
 
     # Resizing images to match 640x480
-    img1 = cv2.resize(cv2.imread('1.png'), (640, 480))
-    img2 = cv2.resize(cv2.imread('2.png'), (640, 480))
+    img1 = cv2.resize(cv2.imread(args.image1), (640, 480))
+    img2 = cv2.resize(cv2.imread(args.image2), (640, 480))
     status = mv.analyze_motion(img1, img2)
     print("Motion status:", status)
+

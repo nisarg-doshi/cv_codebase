@@ -12,68 +12,109 @@ import datetime
 import random
 from google.cloud import storage
 
-# Function to upload a file to Google Cloud Storage
-def upload_file_to_bucket(gcs_path, local_path, bucket, key_path):
-    """
-    Uploads a file to Google Cloud Storage (GCS).
+from google.cloud import storage
+import argparse
 
-    Args:
-        gcs_path (str): The path to the destination file in GCS.
-        local_path (str): The path to the local file to upload.
-        bucket (str): The name of the GCS bucket to upload to.
-        key_path(str): The path to the service account JSON key file.
-
-    Returns:
-        str: A message indicating whether the upload was successful or not.
+class GCSUploader:
     """
-    # Initialize the storage client using the service account key
-    storage_client = storage.Client.from_service_account_json(key)
-    
-    # Get the bucket object
-    bucket = storage_client.bucket(bucket)
-    
-    # Create a blob object representing the destination file in GCS
-    blob = bucket.blob(gcs_path)
-    
-    # Upload the file to GCS
-    blob.upload_from_filename(local_path)
-    
-    # Return a success message
-    return "Upload Successful"
+    A class to upload files to Google Cloud Storage (GCS).
+    """
+
+    def __init__(self, key_path):
+        """
+        Initializes the GCSUploader object.
+
+        Args:
+            key_path (str): The path to the service account JSON key file.
+        """
+        self.key_path = key_path
+        self.storage_client = storage.Client.from_service_account_json(self.key_path)
+
+    def upload_file(self, gcs_path, local_path, bucket_name):
+        """
+        Uploads a file to Google Cloud Storage (GCS).
+
+        Args:
+            gcs_path (str): The path to the destination file in GCS.
+            local_path (str): The path to the local file to upload.
+            bucket_name (str): The name of the GCS bucket to upload to.
+
+        Returns:
+            str: A message indicating whether the upload was successful or not.
+        """
+        # Get the bucket object
+        bucket = self.storage_client.bucket(bucket_name)
+
+        # Create a blob object representing the destination file in GCS
+        blob = bucket.blob(gcs_path)
+
+        # Upload the file to GCS
+        blob.upload_from_filename(local_path)
+
+        # Return a success message
+        return "Upload Successful"
+
+
+# if __name__ == "__main__":
+#     parser = argparse.ArgumentParser(description="Google Cloud Storage File Uploader")
+#     parser.add_argument("--key_path", required=True, help="Path to the service account JSON key file")
+#     parser.add_argument("--gcs_path", required=True, help="Path to the destination file in GCS")
+#     parser.add_argument("--local_path", required=True, help="Path to the local file to upload")
+#     parser.add_argument("--bucket_name", required=True, help="Name of the GCS bucket to upload to")
+#     args = parser.parse_args()
+
+#     uploader = GCSUploader(args.key_path)
+#     result = uploader.upload_file(args.gcs_path, args.local_path, args.bucket_name)
+#     print(result)
+
+
+
 
 
 # Function to generate a signed URL for a file in Google Cloud Storage
-def create_signedurl(name, bucket, key_path):
+class GCSSignedURLGenerator:
     """
-    Generates a signed URL for downloading a file from Google Cloud Storage (GCS).
-
-    Args:
-        name (str): The name of the file in GCS.
-        bucket (str): The name of the GCS bucket containing the file.
-        key_path (str): The path to the service account JSON key file.
-
-    Returns:
-        str: The signed URL for downloading the file.
+    A class to generate signed URLs for downloading files from Google Cloud Storage (GCS).
     """
-    # Initialize the storage client using the service account key
-    storage_client = storage.Client.from_service_account_json(key_path)
-    
-    # Get the bucket object
-    bucket = storage_client.bucket(bucket)
-    
-    # Get the blob object representing the file in GCS
-    blob = bucket.blob(name)
-    
-    # Generate a signed URL with an expiration time of 10 hours
-    url = blob.generate_signed_url(
-        version="v4", 
-        expiration=datetime.timedelta(hours=10), 
-        method="GET"
-    )
-    
-    # Return the signed URL
-    return url
 
+    def __init__(self, key_path):
+        """
+        Initializes the GCSSignedURLGenerator object.
+
+        Args:
+            key_path (str): The path to the service account JSON key file.
+        """
+        self.key_path = key_path
+        self.storage_client = storage.Client.from_service_account_json(self.key_path)
+
+    def generate_signed_url(self, name, bucket_name, expiration_hours=10):
+        """
+        Generates a signed URL for downloading a file from Google Cloud Storage (GCS).
+
+        Args:
+            name (str): The name of the file in GCS.
+            bucket_name (str): The name of the GCS bucket containing the file.
+            expiration_hours (int): Expiration time for the signed URL in hours (default: 10).
+
+        Returns:
+            str: The signed URL for downloading the file.
+        """
+        # Get the bucket object
+        bucket = self.storage_client.bucket(bucket_name)
+
+        # Get the blob object representing the file in GCS
+        blob = bucket.blob(name)
+
+        # Generate a signed URL with the specified expiration time
+        expiration_time = datetime.timedelta(hours=expiration_hours)
+        url = blob.generate_signed_url(
+            version="v4",
+            expiration=expiration_time,
+            method="GET"
+        )
+
+        # Return the signed URL
+        return url
 # Function to enhance class names
 # Function to enhance class names by adding "all" prefix
 def enhance_class_name(class_names: List[str]) -> List[str]:

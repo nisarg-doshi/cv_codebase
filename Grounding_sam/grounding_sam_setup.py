@@ -117,14 +117,13 @@ class GroundingDINOInstaller:
         else:
             print("There is something wrong while installing Grounding DINO")
 
-def parse_args():
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Install GroundingDINO and required dependencies")
     parser.add_argument("--home", type=str, default=os.getcwd(), help="Home directory (default: current working directory)")
     parser.add_argument("--commit", type=str, default="57535c5a79791cb76e36fdb64975271354f10251", help="Commit hash to checkout (default: latest)")
-    return parser.parse_args()
-
-if __name__ == "__main__":
-    args = parse_args()
+    parser.parse_args()
+    args = parser.parse_args()
     installer = GroundingDINOInstaller(args.home)
     installer.set_home_directory()
     installer.clone_grounding_dino_repository()

@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-
+import argparse
 class PolygonMarker:
     def __init__(self, image):
         """
@@ -75,7 +75,16 @@ class PolygonMarker:
         cv2.destroyAllWindows()
         return self.compartment1_points, self.compartment2_points
 
+
+
 if __name__ == "__main__":
-    marker = PolygonMarker('1.png')
+    parser = argparse.ArgumentParser(description="Polygon Marker Script")
+    parser.add_argument("--image_file", type=str, help="Path to the image file")
+    args = parser.parse_args()
+    marker = PolygonMarker(args.image_file)
+    
+    # Mark polygons on the image
     compartment1_points, compartment2_points = marker.mark_polygons()
+
+
 
