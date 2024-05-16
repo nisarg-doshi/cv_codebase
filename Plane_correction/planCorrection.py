@@ -106,4 +106,3 @@ def correct_perspective(image, points):
     warped_image = cv2.warpPerspective(image, M, (width, height))
 
     return warped_image
-
