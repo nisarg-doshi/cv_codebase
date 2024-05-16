@@ -194,55 +194,23 @@ def inference_model(img_id, image, class_list=["person"]):
 
     # Save annotated image
     filename = f"{img_id}_annoted.png"
-    path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    path = os.path.join('UPLOAD_FOLDER', filename)
     cv2.imwrite(path, annotated_image)
     
     return annotated_image, path
 
 
-# Flask application setup
-app = Flask(__name__)
-UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
-
-# Route to upload an image, perform inference, and return the result
-@app.route("/get_image/", methods=["POST"])
-def run():
-    inference_start_time = datetime.datetime.now().isoformat()
-    print("Entered")
-    print(str(request.files))
-    image_id = random.randint(11,9999999)
-    x = datetime.datetime.now()
-    x = str(x)
-    x = str(x[:x.rfind(".")+1])
-    image_id = str(x) + str(image_id)
-    
-    image = request.files["image"]
-    image_name = str(image_id) + ".png"
-    
-    if image is None:
-        return jsonify({'error': "No image found"}), 400
-    else:
-        os.system("rm -r uploads/*")
-        image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_name)
-        image.save(image_path)
-        print("image saved")
-        image = cv2.imread(image_path)
-        
-        annotated_image, path = inference_model(image_id, image, class_list)
-                
-        print("Uploading image")
-        image_name_in_bucket = f"image_data/{image_name}"
-        upload_file(image_name_in_bucket, path)
-        print("Created authenticated URL")
-        url = signedurl(image_name_in_bucket)
-        
-    return jsonify({'success': "its finished", "url": url})
 
 # Main function to run the Flask application
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    image_path = "temp.png"
+    image_id = random.randint(11,999999)
+    class_list = ["person"]
+    image = cv2.imread(image_path)
+    
+    annotated_image, path = inference_model(image_id, image, class_list)
+            
+    
+    
+    print("background subtarcted image saved at {path}")
