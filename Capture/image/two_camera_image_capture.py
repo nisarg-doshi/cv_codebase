@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import uuid 
+import argparse
 from Capture.capture_utils.send_image_to_rlef import SendImageToRLEF  # Assuming SendImageToRLEF class exists
 
 class TwoCameraImageCapture:
@@ -121,18 +122,39 @@ class TwoCameraImageCapture:
             cap.release()
         cv2.destroyAllWindows()
 
+
+
 if __name__ == "__main__":
-    rlef_model_id = "65b0f505ee58cd58dabc1b83"
-    # rlef_model_id = ""
-    two_camera_capture = TwoCameraImageCapture(camera_indexes=[2, 5], image_width=1280, image_height=960, destination_folder="", rlef_model_id=rlef_model_id)
-    
-    # Example usage for capturing frames and sending to RLEF
+    parser = argparse.ArgumentParser(description="Dual camera image capture with optional sending to RLEF")
+    parser.add_argument("--rlef_model_id", type=str, default="", help="ID of the RLEF model (default: '')")
+    parser.add_argument("--camera_indexes", nargs="+", type=int, default=[2, 5], help="Indexes of the cameras (default: [2, 5])")
+    parser.add_argument("--image_width", type=int, default=1280, help="Width of the captured image (default: 1280)")
+    parser.add_argument("--image_height", type=int, default=960, help="Height of the captured image (default: 960)")
+    parser.add_argument("--destination_folder", type=str, default="", help="Destination folder for saving images locally (default: '')")
+    args = parser.parse_args()
+
+    rlef_model_id = args.rlef_model_id
+    camera_indexes = args.camera_indexes
+    image_width = args.image_width
+    image_height = args.image_height
+    destination_folder = args.destination_folder
+
+    two_camera_capture = TwoCameraImageCapture(
+        camera_indexes=camera_indexes,
+        image_width=image_width,
+        image_height=image_height,
+        destination_folder=destination_folder,
+        rlef_model_id=rlef_model_id
+    )
+
+    # If an RLEF model ID is provided, capture frames and send to RLEF
     if rlef_model_id:
         model_name = "Item In Hand Classification"
         label = 'initial'
         tags = ['top_left_shelf', 'top_right_shelf']
         two_camera_capture.capture_frames_and_send_to_rlef(model_name, label, tags)
     
-    # Example usage for capturing frames locally
+    # Otherwise, capture frames locally
     else:
         two_camera_capture.capture_frames_locally()
+

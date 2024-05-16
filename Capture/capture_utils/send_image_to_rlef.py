@@ -1,6 +1,7 @@
 import requests
 import threading
 import os
+import argparse
 
 class SendImageToRLEF:
     def __init__(self, model_id):
@@ -79,3 +80,18 @@ if __name__ == "__main__":
     tag = 'top_shelf'
     client = SendImageToRLEF(model_id)
     client.send_image(model_name, label, file_path, tag)
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Send an image to RLEF for processing")
+    parser.add_argument("--model_name", type=str, help="Name of the model")
+    parser.add_argument("--model_id", type=str, help="ID of the model")
+    parser.add_argument("--label", type=str, default="initial", help="Label for the image (default: 'initial')")
+    parser.add_argument("--file_path", type=str, help="Path to the image file")
+    parser.add_argument("--tag", type=str, default="top_shelf", help="Tag for the image (default: 'top_shelf')")
+    args = parser.parse_args()
+
+  
+    client = SendImageToRLEF(args.model_id)
+    client.send_image(args.model_name, args.label, args.file_path, args.tag)

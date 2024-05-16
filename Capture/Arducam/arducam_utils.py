@@ -2,36 +2,68 @@ import threading
 
 import ArducamSDK
 from utils import *
+import argparse
+import time
 
+class ArducamCamera:
+    """
+    A class to interface with Arducam cameras.
 
-class ArducamCamera(object):
+    Attributes:
+    - isOpened: A boolean indicating whether the camera is opened or not.
+    - running_: A boolean indicating whether the camera is running or not.
+    - thread_: A thread object for image capture.
+    - lock_: A lock to synchronize access to the buffer.
+    - buffer_: A list to store captured image data and configurations.
+    """
+
     def __init__(self):
         self.isOpened = False
         self.running_ = False
         self.thread_ = None
         self.lock_ = threading.Lock()
         self.buffer_ = []
-        pass
 
     def openCamera(self, fname, index=0):
-        self.isOpened, self.handle, self.cameraCfg, self.color_mode = camera_initFromFile(
-            fname, index)
-        print('opencamera function handle', self.handle)
+        """
+        Open the camera.
+
+        Args:
+        - fname (str): Path to the camera configuration file.
+        - index (int): Index of the camera to open (default: 0).
+
+        Returns:
+        bool: True if the camera is opened successfully, False otherwise.
+        """
+        self.isOpened, self.handle, self.cameraCfg, self.color_mode = camera_initFromFile(fname, index)
         return self.isOpened
 
     def start(self):
+        """
+        Start capturing images from the camera.
+        """
         if not self.isOpened:
             raise RuntimeError("The camera has not been opened.")
 
         self.running_ = True
         ArducamSDK.Py_ArduCam_setMode(self.handle, ArducamSDK.CONTINUOUS_MODE)
-        print('start function handle', self.handle)
 
         # Start the capture thread
         self.thread_ = threading.Thread(target=self.capture_thread)
         self.thread_.start()
 
+
     def read(self, timeout=1500):
+        """
+        Read a captured image from the buffer.
+
+        Args:
+        - timeout (int): Maximum time (in milliseconds) to wait for an image.
+
+        Returns:
+        tuple: A tuple containing (success, data, cfg), where success is a boolean indicating whether the read was successful,
+        data is the image data, and cfg is the image configuration.
+        """
         if not self.running_:
             raise RuntimeError("The camera is not running.")
 
@@ -49,6 +81,9 @@ class ArducamCamera(object):
                 return (False, None, None)
 
     def stop(self):
+        """
+        Stop capturing images from the camera.
+        """
         if not self.running_:
             raise RuntimeError("The camera is not running.")
 
@@ -58,6 +93,9 @@ class ArducamCamera(object):
         self.thread_.join()
 
     def closeCamera(self):
+        """
+        Close the camera.
+        """
         if not self.isOpened:
             raise RuntimeError("The camera has not been opened.")
 
@@ -69,6 +107,9 @@ class ArducamCamera(object):
         self.handle = None
 
     def capture_thread(self):
+        """
+        Thread function to capture images continuously.
+        """
         ret = ArducamSDK.Py_ArduCam_beginCaptureImage(self.handle)
 
         if ret != 0:
@@ -97,9 +138,22 @@ class ArducamCamera(object):
 
 
     def setCtrl(self, func_name, val):
-        return ArducamSDK.Py_ArduCam_setCtrl(self.handle, func_name, val)
+            """
+            Set camera control parameters.
+
+            Args:
+            - func_name (str): Name of the control function.
+            - val: Value to set.
+
+            Returns:
+            bool: True if successful, False otherwise.
+            """
+            return ArducamSDK.Py_ArduCam_setCtrl(self.handle, func_name, val)
 
     def dumpDeviceInfo(self):
+        """
+        Print device information.
+        """
         USB_CPLD_I2C_ADDRESS=0x46
         cpld_info={}
         ret, version = ArducamSDK.Py_ArduCam_readReg_8_8(
@@ -130,6 +184,9 @@ class ArducamCamera(object):
         print(usb_info)
 
     def getCamInformation(self):
+        """
+        Get camera information.
+        """
         self.version = ArducamSDK.Py_ArduCam_readReg_8_8(self.handle, 0x46, 00)[1]
         self.year = ArducamSDK.Py_ArduCam_readReg_8_8(self.handle, 0x46, 5)[1]
         self.mouth = ArducamSDK.Py_ArduCam_readReg_8_8(self.handle, 0x46, 6)[1]
@@ -139,6 +196,9 @@ class ArducamCamera(object):
         return cpldVersion
 
     def getMipiDataInfo(self):
+        """
+        Get MIPI data information.
+        """
         mipiData = {"mipiDataID": "",
                     "mipiDataRow": "",
                     "mipiDataCol": "",
@@ -191,3 +251,21 @@ class ArducamCamera(object):
             fpsResult = "{:.1f}".format(fps)
             mipiData["mFramerateValue"] = fpsResult
         return mipiData
+    
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Arducam Camera Interface")
+    parser.add_argument("--config_file", type=str, required=True, help="Path to the camera configuration file")
+    args = parser.parse_args()
+
+    camera = ArducamCamera()
+    camera.openCamera(args.config_file)
+    camera.start()
+
+    success, data, cfg = camera.read()
+    if success:
+        print("Image captured successfully.")
+
+    camera.stop()
+    camera.closeCamera()
+

@@ -1,52 +1,53 @@
 import cv2
-import traceback
 import numpy as np
-from ultralytics import YOLO
 import random
+import argparse
+from ultralytics import YOLO
 
-def euc_dis(cord1, cord2):
+class PoseEstimator:
     """
-    Calculates the Euclidean distance between two points.
+    Class for performing live pose estimation using YOLOv8 model on video frames.
+    """
+
+    def __init__(self, model_path='yolov8s-pose.pt'):
+        """
+        Initializes the PoseEstimator object.
+
+        Args:
+            model_path (str): Path to the YOLOv8 model weights.
+        """
+        self.model = YOLO(model_path)
+
+    def inference_live(self, frame):
+        """
+        Performs live inference using YOLOv8 model on a frame and draws all key pose points.
+
+        Args:
+            frame (numpy.ndarray): Input frame.
+
+        Returns:
+            numpy.ndarray: Frame with inferred keypoints and confidence values.
+        """
+        result = self.model.track(frame, conf=0.25, verbose=False)
+        try:
+            model_result_conf = list(result[0].keypoints.conf.cpu().tolist())
+            model_result_kp = list(result[0].keypoints.xy.cpu().tolist())
+            for confs, kps in zip(model_result_conf, model_result_kp):
+                for kp in kps:
+                    x, y = int(kp[0]), int(kp[1])
+                    cv2.circle(frame, (x, y), radius=3, color=(0, 255, 0), thickness=-1)
+        except:
+            pass
+        return frame
+
+def main(model_path='yolov8s-pose.pt'):
+    """
+    Main function for live pose estimation using YOLOv8 model on video frames.
 
     Args:
-    - cord1 (tuple): Coordinates of the first point.
-    - cord2 (tuple): Coordinates of the second point.
-
-    Returns:
-    - distance (float): Euclidean distance between the points.
+        model_path (str): Path to the YOLOv8 model weights.
     """
-    point1 = np.array(cord1)
-    point2 = np.array(cord2)
-    sum_sq = np.sum(np.square(point1 - point2))
-    return np.sqrt(sum_sq)
-
-def inference_live(frame_d):
-    """
-    Performs live inference using YOLOv8 model on a frame and draws all key pose points.
-
-    Args:
-    - frame_d (numpy.ndarray): Input frame.
-
-    Returns:
-    - dum_fr (numpy.ndarray): Frame with inferred keypoints and confidence values.
-    """
-    in_id = random.randint(1, 999999)
-    result = model.track(frame_d, conf=0.25, verbose=False)
-    try:
-        model_result_conf = list(result[0].keypoints.conf.cpu().tolist())
-        model_result_kp = list(result[0].keypoints.xy.cpu().tolist())
-        for confs, kps in zip(model_result_conf, model_result_kp):
-            for kp in kps:
-                x, y = int(kp[0]), int(kp[1])
-                cv2.circle(frame_d, (x, y), radius=3, color=(0, 255, 0), thickness=-1)
-    except:
-        return frame_d
-    
-    return frame_d
-
-def main():
-    # Initialize YOLO model
-    model = YOLO('yolov8s-pose.pt')
+    pose_estimator = PoseEstimator(model_path)
 
     # Initialize video capture
     cam = cv2.VideoCapture(3)
@@ -54,7 +55,7 @@ def main():
 
     while True:
         ret, frame = cam.read()
-        cv2.imshow("Result Frame", inference_live(frame))
+        cv2.imshow("Result Frame", pose_estimator.inference_live(frame))
         key = cv2.waitKey(1) & 0xFF
         if key == ord(' '):
             cv2.imwrite('captured_image.png', frame)
@@ -67,4 +68,7 @@ def main():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Live pose estimation using YOLOv8 model.")
+    parser.add_argument("--model_path", type=str, default='yolov8s-pose.pt', help="Path to the YOLOv8 model weights.")
+    args = parser.parse_args()
+    main(args.model_path)

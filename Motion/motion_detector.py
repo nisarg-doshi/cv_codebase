@@ -2,6 +2,7 @@ import cv2
 import time
 import numpy as np
 import random
+import argparse
 
 class MotionDetector:
     def __init__(self, source=0, alpha=0.15, fps=30, threshold=30, min_contour_area=1000, blur_kernel_size=(15, 15), recording_fps=10.0):
@@ -114,6 +115,32 @@ class MotionDetector:
             self.out.release()
         cv2.destroyAllWindows()
 
+
+
+
+
 if __name__ == "__main__":
-    detector = MotionDetector(source=5, alpha=0.15, fps=30, threshold=30, min_contour_area=1000, blur_kernel_size=(15, 15), recording_fps=10.0)
+    parser = argparse.ArgumentParser(description="Motion Detection Script")
+    parser.add_argument("--source", type=int, default=5, help="Source index for the video stream (default: 5)")
+    parser.add_argument("--alpha", type=float, default=0.15, help="Weight of the current frame when accumulating the average frame (default: 0.15)")
+    parser.add_argument("--fps", type=int, default=30, help="Frames per second of the video stream (default: 30)")
+    parser.add_argument("--threshold", type=int, default=30, help="Threshold value for detecting motion (default: 30)")
+    parser.add_argument("--min_contour_area", type=int, default=1000, help="Minimum contour area to be considered as motion (default: 1000)")
+    parser.add_argument("--blur_kernel_size", type=str, default="15,15", help="Size of the kernel for Gaussian blur in the format 'height,width' (default: '15,15')")
+    parser.add_argument("--recording_fps", type=float, default=10.0, help="Frames per second for recording motion (default: 10.0)")
+    args = parser.parse_args()
+
+
+    detector = MotionDetector(
+        source=args.source,
+        alpha=args.alpha,
+        fps=args.fps,
+        threshold=args.threshold,
+        min_contour_area=args.min_contour_area,
+        blur_kernel_size=args.blur_kernel_size,
+        recording_fps=args.recording_fps
+    )
+
+    # Run the motion detection
     detector.run_detection()
+

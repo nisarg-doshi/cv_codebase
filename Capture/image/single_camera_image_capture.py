@@ -2,7 +2,7 @@ import cv2
 import os
 import random
 from Capture.capture_utils.send_image_to_rlef import SendImageToRLEF
-
+import argparse
 class SingleImageCapture:
     """
     A class to capture images from a camera.
@@ -65,14 +65,37 @@ class SingleImageCapture:
         cv2.destroyAllWindows()
 
 # Example Usage
+
+
 if __name__ == "__main__":
-    rlef_model_id = "65b0f505ee58cd58dabc1b83"
-    single_image_capture = SingleImageCapture(camera_index=5, image_width=1280, image_height=960, destination_folder="", rlef_model_id=rlef_model_id)
-    
-    if rlef_model_id=="":  # Only saves the images locally
+    parser = argparse.ArgumentParser(description="Single camera image capture with optional sending to RLEF")
+    parser.add_argument("--rlef_model_id", type=str, default="", help="ID of the RLEF model (default: '')")
+    parser.add_argument("--camera_index", type=int, default=5, help="Index of the camera (default: 5)")
+    parser.add_argument("--image_width", type=int, default=1280, help="Width of the captured image (default: 1280)")
+    parser.add_argument("--image_height", type=int, default=960, help="Height of the captured image (default: 960)")
+    parser.add_argument("--destination_folder", type=str, default="", help="Destination folder for saving images locally (default: '')")
+    args = parser.parse_args()
+
+    rlef_model_id = args.rlef_model_id
+    camera_index = args.camera_index
+    image_width = args.image_width
+    image_height = args.image_height
+    destination_folder = args.destination_folder
+
+    single_image_capture = SingleImageCapture(
+        camera_index=camera_index,
+        image_width=image_width,
+        image_height=image_height,
+        destination_folder=destination_folder,
+        rlef_model_id=rlef_model_id
+    )
+
+    # If no RLEF model ID is provided, only save images locally
+    if rlef_model_id == "":
         single_image_capture.capture_images()
-    else:  # Sends it to rlef if model id mentioned
+    else:
         model_name = "Item In Hand Classification"
         label = 'initial'
         tag = 'top_shelf'
         single_image_capture.capture_images(model_name, label, tag)
+
