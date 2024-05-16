@@ -104,7 +104,7 @@ class YOLOTrainer:
             None
         """
         # Initialize YOLOv8 model
-        model = YOLO('yolov8n-seg.pt')  # Load a pretrained model (recommended for training)
+        model = YOLO('yolov8l-seg.pt')  # Load a pretrained model (recommended for training)
 
         # Train the model
         model.train(
