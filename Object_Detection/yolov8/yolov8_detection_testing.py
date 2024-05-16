@@ -1,34 +1,52 @@
-
-# Import necessary libraries
+import argparse
 from ultralytics import YOLO
 
-def test_yolov8_model(model_path, image_path):
+class YOLOv8Tester:
     """
-    Tests a YOLOv8 model on a single image and displays the results.
+    A class to test YOLOv8 models on single images.
 
-    Args:
-    - model_path (str): Path to the YOLOv8 model file.
-    - image_path (str): Path to the image to be tested.
-
-    Returns:
-    None
+    Attributes:
+    - model: YOLOv8 model instance.
     """
-    # Initialize YOLOv8 model
-    model = YOLO(model_path)
 
-    # Perform inference on the image
-    results = model(image_path)
+    def __init__(self, model_path):
+        """
+        Initializes the YOLOv8Tester with the specified model.
 
-    # Extract and display the results
-    for result in results:
-        result.show()
-        result.save(filename='result.jpg')
+        Args:
+        - model_path (str): Path to the YOLOv8 model file.
+        """
+        self.model = YOLO(model_path)
+
+    def test_image(self, image_path):
+        """
+        Tests the YOLOv8 model on a single image and displays the results.
+
+        Args:
+        - image_path (str): Path to the image to be tested.
+
+        Returns:
+        None
+        """
+        # Perform inference on the image
+        results = self.model(image_path)
+
+        # Extract and display the results
+        for result in results:
+            result.show()
+            result.save(filename='result.jpg')
+
+
 
 if __name__ == "__main__":
 
-    # Testing parameters
-    model_path = "best.pt"
-    image_path = "image.png"
+    parser = argparse.ArgumentParser(description="Test YOLOv8 model on a single image")
+    parser.add_argument("--model_path", type=str, required=True, default="yolov8n.pt", help="Path to the YOLOv5 model file")
+    parser.add_argument("--image_path", type=str, required=True, help="Path to the image to be tested")
+    args = parser.parse_args()
 
-    # Test YOLOv8 model
-    test_yolov8_model(model_path, image_path)
+    # Create YOLOv5Tester object
+    tester = YOLOv8Tester(args.model_path)
+
+    # Test image using YOLOv5Tester
+    tester.test_image(args.image_path)
